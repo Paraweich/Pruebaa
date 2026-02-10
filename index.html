@@ -343,6 +343,7 @@ function reproducirSonido(tipo) {
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     
     if (tipo === 'si') {
+        // Sonido alegre para SÍ
         const osc = audioContext.createOscillator();
         const gain = audioContext.createGain();
         
@@ -356,6 +357,7 @@ function reproducirSonido(tipo) {
         osc.start(audioContext.currentTime);
         osc.stop(audioContext.currentTime + 0.1);
         
+        // Segunda nota
         setTimeout(() => {
             const osc2 = audioContext.createOscillator();
             const gain2 = audioContext.createGain();
@@ -372,6 +374,7 @@ function reproducirSonido(tipo) {
         }, 100);
         
     } else if (tipo === 'no') {
+        // Sonido triste para NO
         const osc = audioContext.createOscillator();
         const gain = audioContext.createGain();
         
@@ -455,6 +458,7 @@ function cambiarPantalla(num) {
     const pantalla = document.getElementById('pantalla' + num);
     pantalla.classList.add('activa');
     
+    // Agregar zoom solo a pantalla 3
     if (num === 3) {
         pantalla.classList.add('zoom-in');
     }
@@ -477,15 +481,18 @@ function mostrarGifTriste() {
 
 function volverAlInicio() {
     reproducirSonido('si');
+    // Resetear todas las variables
     contadorNo = 0;
     escalaSi = 1;
     primeraVez = true;
     isMovingMode = false;
     if (moveInterval) clearInterval(moveInterval);
     
+    // Eliminar todos los botones de explosión del DOM
     const botonesExplosion = document.querySelectorAll('.btn-si-flood');
     botonesExplosion.forEach(btn => btn.remove());
     
+    // Resetear estilos de botones
     btnSi.style.transform = 'scale(1)';
     btnSi.style.opacity = '1';
     btnSi.style.pointerEvents = 'auto';
@@ -497,13 +504,16 @@ function volverAlInicio() {
     btnNo.style.transform = 'scale(1)';
     btnNo.classList.remove('moving');
     
+    // Resetear gif y texto
     imgGif.src = "https://i.ibb.co/Gfkxj1m4/Grabacindepantalla2026-02-08212818-ezgif-com-video-to-gif-converter.gif";
     textoNo.style.display = 'none';
     textoNo.innerHTML = '';
     
+    // Limpiar input de login
     inputNombre.value = '';
     mensajeError.style.display = 'none';
     
+    // Volver a pantalla 0 (login)
     cambiarPantalla(0);
 }
 
@@ -529,4 +539,141 @@ function activarNo() {
         textoNo.innerHTML = "¡YA BASTA POR FAVOR! 😭💔";
     } else if (contadorNo >= 3) {
         textoNo.innerHTML = "¡YA BASTA! 💔 ¡AHORA TENÉS QUE ATRAPARME! 🔥";
-        imgGif.src = "https://i.ibb.co/0LT5Mcb/ezgif-com-animated-gif
+        imgGif.src = "https://i.ibb.co/0LT5Mcb/ezgif-com-animated-gif-maker.gif";
+        if (!isMovingMode) activarModoMovimientoLibre();
+    } else if (contadorNo >= 2) {
+        textoNo.innerHTML = "¿POR QUÉ DECIS NO TODAVIA? 😭💔";
+        imgGif.src = "https://i.ibb.co/vCBmPXbx/STK-20250727-WA0007.webp";
+    } else {
+        textoNo.innerHTML = "¿POR QUÉ APRETÁS EL NO? 😭";
+        imgGif.src = "https://i.ibb.co/C5dZstcx/Grabacindepantalla2026-02-08212636-ezgif-com-video-to-gif-converter.gif";
+    }
+
+    imgGif.style.display = 'none';
+    imgGif.offsetHeight;
+    imgGif.style.display = 'block';
+
+    escalaSi = Math.min(escalaSi * 1.25, 3.5);
+    btnSi.style.transform = `scale(${escalaSi})`;
+
+    if (contadorNo === 5) {
+        btnNo.style.opacity = '0';
+        btnNo.style.pointerEvents = 'none';
+    } else {
+        // El botón No mantiene su tamaño original
+        btnNo.style.transform = `scale(1)`;
+    }
+
+    if (primeraVez && contadorNo >= 1) {
+        btnNo.style.position = "fixed";
+        btnNo.style.left = (window.innerWidth / 2 - btnNo.offsetWidth / 2) + 'px';
+        btnNo.style.top = (window.innerHeight / 2 + 80) + 'px';
+        primeraVez = false;
+    }
+
+    if (!isMovingMode && contadorNo < 3) {
+        const x = Math.random() * (window.innerWidth - btnNo.offsetWidth - 100) + 50;
+        const y = Math.random() * (window.innerHeight - btnNo.offsetHeight - 100) + 50;
+        btnNo.style.left = `${x}px`;
+        btnNo.style.top = `${y}px`;
+    }
+
+    if (contadorNo === 5) {
+        btnSi.style.transform = `scale(0)`;
+        btnSi.style.opacity = '0';
+        btnSi.style.pointerEvents = 'none';
+
+        setTimeout(() => {
+            const card = document.querySelector('#pantalla1 .card');
+            const cardRect = card.getBoundingClientRect();
+            const colores = ['#f06292', '#ec407a', '#e91e63', '#c2185b', '#ff80ab', '#ff4081', '#d81b60'];
+            
+            for (let i = 0; i < 200; i++) {
+                setTimeout(() => {
+                    const btnFlood = document.createElement('button');
+                    btnFlood.className = 'btn-si-flood';
+                    btnFlood.textContent = '¡SÍ!';
+                    btnFlood.style.backgroundColor = colores[Math.floor(Math.random() * colores.length)];
+                    
+                    // Posición inicial más centrada dentro de la tarjeta
+                    const randomOriginX = 20 + Math.random() * (cardRect.width - 80);
+                    const randomOriginY = 40 + Math.random() * (cardRect.height - 140);
+                    
+                    btnFlood.style.left = randomOriginX + 'px';
+                    btnFlood.style.top = randomOriginY + 'px';
+                    
+                    const direccion = i < 100 ? -1 : 1;
+                    const baseAngle = direccion === -1 ? 180 : 0;
+                    const angle = (baseAngle + (Math.random() * 90 - 45)) * (Math.PI / 180);
+                    
+                    const explodeDistance = 120 + Math.random() * 250;
+                    const explodeX = Math.cos(angle) * explodeDistance;
+                    const explodeY = -Math.abs(Math.sin(angle) * explodeDistance * 0.5);
+                    const finalX = explodeX * 0.8 + (Math.random() - 0.5) * 80;
+                    const finalY = cardRect.height - randomOriginY - 40 + (Math.random() * 35);
+                    const rotation = Math.random() * 1440 - 720;
+                    
+                    btnFlood.style.setProperty('--explode-x', `${explodeX}px`);
+                    btnFlood.style.setProperty('--explode-y', `${explodeY}px`);
+                    btnFlood.style.setProperty('--final-x', `${finalX}px`);
+                    btnFlood.style.setProperty('--final-y', `${finalY}px`);
+                    btnFlood.style.setProperty('--rotate', `${rotation}deg`);
+                    
+                    btnFlood.style.animationDelay = (i * 0.003) + 's';
+                    btnFlood.style.animationDuration = (Math.random() * 0.6 + 1.8) + 's';
+                    
+                    btnFlood.addEventListener('click', () => {
+                        reproducirSonido('si');
+                        mostrarInvitacion();
+                    });
+                    card.appendChild(btnFlood);
+                }, i * 6);
+            }
+        }, 400);
+    }
+}
+
+function activarModoMovimientoLibre() {
+    isMovingMode = true;
+    btnNo.classList.add('moving');
+    let dx = (Math.random() > 0.5 ? 1 : -1) * (150 + Math.random() * 150);
+    let dy = (Math.random() > 0.5 ? 1 : -1) * (80 + Math.random() * 80);
+    
+    let velocidadMultiplicador = contadorNo >= 5 ? 4.5 : 2.35;
+    
+    moveInterval = setInterval(() => {
+        if (!isMovingMode) return;
+        let currentLeft = parseFloat(btnNo.style.left) || window.innerWidth / 2;
+        let currentTop = parseFloat(btnNo.style.top) || window.innerHeight / 2;
+        currentLeft += dx * 0.016 * velocidadMultiplicador;
+        currentTop += dy * 0.016 * velocidadMultiplicador;
+        if (currentLeft < 30 || currentLeft > window.innerWidth - btnNo.offsetWidth - 30) {
+            dx = -dx * (1.0 + Math.random() * 0.3);
+            dy += (Math.random() - 0.5) * 20;
+        }
+        if (currentTop < 30 || currentTop > window.innerHeight - btnNo.offsetHeight - 30) {
+            dy = -dy * (1.0 + Math.random() * 0.3);
+            dx += (Math.random() - 0.5) * 40;
+        }
+        if (Math.random() < 0.06) {
+            dx = (Math.random() > 0.5 ? 1 : -1) * (140 + Math.random() * 140);
+            dy = (Math.random() > 0.5 ? 1 : -1) * (70 + Math.random() * 90);
+        }
+        btnNo.style.left = `${Math.max(30, Math.min(window.innerWidth - btnNo.offsetWidth - 30, currentLeft))}px`;
+        btnNo.style.top = `${Math.max(30, Math.min(window.innerHeight - btnNo.offsetHeight - 30, currentTop))}px`;
+    }, 12);
+}
+
+// EVENT LISTENERS
+btnEntrar.addEventListener('click', validarAcceso);
+btnSi.addEventListener('click', mostrarInvitacion);
+btnNo.addEventListener('click', activarNo);
+btnConfirmar.addEventListener('click', mostrarDetallesCita);
+btnMejorNo.addEventListener('click', mostrarGifTriste);
+btnVolver.addEventListener('click', volverAlInicio);
+btnVolverPantalla3.addEventListener('click', volverAlInicio);
+
+});
+</script>
+</body>
+</html>
